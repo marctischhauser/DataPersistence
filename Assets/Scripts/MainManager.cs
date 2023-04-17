@@ -1,5 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
+// --------------------------------------------------------------------------------
+//  Copyright (C) 2023 TwoAmigos
+// --------------------------------------------------------------------------------
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -9,23 +11,44 @@ public class MainManager : MonoBehaviour
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
-
+    public Text BestScoreText;
     public Text ScoreText;
     public GameObject GameOverText;
-    
-    private bool m_Started = false;
-    private int m_Points;
-    
-    private bool m_GameOver = false;
+    public Button MenuButton;
 
-    
-    // Start is called before the first frame update
-    void Start()
+    private bool m_Started;
+    private int m_Points;
+
+    private bool m_GameOver;
+
+    public void GameOver()
     {
+        if (m_Points > DataStore.Instance.Score)
+        {
+            DataStore.Instance.Score = m_Points;
+            DataStore.Instance.Save();
+            UpdateBestscoreText();
+        }
+
+        m_GameOver = true;
+        GameOverText.SetActive(true);
+        MenuButton.gameObject.SetActive(true);
+    }
+
+    private void UpdateBestscoreText()
+    {
+        BestScoreText.text = $"Bestscore: {DataStore.Instance.Name}: {DataStore.Instance.Score}";
+    }
+
+    // Start is called before the first frame update
+    private void Start()
+    {
+        MenuButton.onClick.AddListener(Back);
+        UpdateBestscoreText();
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -62,15 +85,14 @@ public class MainManager : MonoBehaviour
         }
     }
 
-    void AddPoint(int point)
+    private void Back()
+    {
+        SceneManager.LoadScene("Menu");
+    }
+
+    private void AddPoint(int point)
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
-    }
-
-    public void GameOver()
-    {
-        m_GameOver = true;
-        GameOverText.SetActive(true);
     }
 }
